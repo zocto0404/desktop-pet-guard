@@ -46,6 +46,14 @@ dotnet publish desktop-pet/DesktopPet.csproj -c Release -r win-x64 --self-contai
 
 双击输出目录中的 `WobblyPet.exe`，保留同目录 DLL、deps 与 runtimeconfig 文件。本机运行目录已完成启动验证。重复打开不会产生多只桌宠；更新版本前先退出旧版。程序不注册开机启动。
 
+## 踏板接入
+
+默认接收页为 `http://127.0.0.1:5180/guard-pedals/index.html`，通过 Web Serial 以 115200 波特率读取两块踏板的 DA1 帧。空板、踩住和补录空板的算法沿用 DESK AWAY，仍可在平转后的多个空板角度识别离板。每个有效帧独立计算左右脚的在板状态、横纵轴和下踩计数。
+
+如果已在同一浏览器的 `http://127.0.0.1:5178` 存过校准，在现有 DESK AWAY 的 Vite `public` 下创建 `guard-pedals` 文件夹，将本仓库 `desktop-pet/Assets/pedals/` 的内容复制进去。桌宠会优先打开该同源页面并读取原来的 `desk-away-pedal-play-v1-0` / `desk-away-pedal-play-v1-1` 数据。校准存储随浏览器、地址和端口划分。更换传感器安装角度后请重新校准。
+
+接收页通过随机配对标识和已知本机来源接入 `/pedals/` WebSocket。`M1` 帧按 `M1,左状态,左X,左Y,左下踩计数,右状态,右X,右Y,右下踩计数` 发送。坐标范围为 `-1` 至 `1`，状态 `1 / 0 / ?` 分别表示踩住、离板、等待。桌宠回送两侧状态用于确认接收，仍支持旧的双字符状态帧用于日常动作。断流或换连接后，游戏从新计数开始，避免重放旧的下踩。USB 固件无需改动。
+
 ## 验证与导出
 
 以下命令通过程序内的同一渲染器验证状态并导出 PNG 帧，不使用屏幕捕获：
@@ -59,6 +67,7 @@ dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-guard ou
 dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --smoke-guard output/guard-qa
 dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --smoke-flow output/guard-qa
 dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-controls output/controls-qa
+dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-pedals output/pedal-qa
 ```
 
 各目录的 `result.txt` 保存验证结果。覆盖原始增强帧与循环节奏、长按不重放正常片段、固定粉色和不透明度、散落部件、三个恢复目标、快速切换、错峰眨眼、透明倒计时和离场。

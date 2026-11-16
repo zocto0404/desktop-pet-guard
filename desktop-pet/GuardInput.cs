@@ -18,9 +18,13 @@ sealed class GuardInput
         leftHeld=Down(0x46);rightHeld=Down(0x48);left.Sample(leftHeld);right.Sample(rightHeld);pause.Sample(Down(0x1b));
         if(GetCursorPos(out var p))cursor=new(p.X,p.Y);
     }
-    public void Step(GuardGame game,double dt,FrameworkElement surface,Matrix inverse)
+    public void PollPause(GuardGame game)
     {
         if(pause.Sample(Down(0x1b)))game.TogglePause();
+    }
+    public void Step(GuardGame game,double dt,FrameworkElement surface,Matrix inverse)
+    {
+        PollPause(game);
         bool l=Down(0x46),r=Down(0x48),lp=left.Sample(l),rp=right.Sample(r);
         if(!game.Paused)
         {

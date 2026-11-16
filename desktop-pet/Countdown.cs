@@ -176,6 +176,10 @@ sealed class CountdownView:FrameworkElement
     public GuardScene? Guard;
     public Matrix StageMatrix=Matrix.Identity;
     public double PetOpacity=1;
+    public string? GuardStatus;
+    string? previousStatus;
+    FormattedText? statusText;
+    static readonly Brush statusBackground = new SolidColorBrush(Color.FromArgb(235,48,45,70));
     public CountdownScene.Actor[]? CancelActors;
     static double Ease(double t){t=Math.Clamp(t,0,1);return t*t*(3-2*t);}
     public double FormationScale=>Math.Min(FormationBounds.Width/1280,FormationBounds.Height/720);
@@ -205,7 +209,27 @@ sealed class CountdownView:FrameworkElement
     }
     protected override void OnRender(DrawingContext dc)
     {
-        if(Guard!=null){dc.PushTransform(new MatrixTransform(StageMatrix));Guard.Draw(dc,PetOpacity);dc.Pop();return;}
+        if(Guard!=null)
+        {
+            dc.PushTransform(new MatrixTransform(StageMatrix));Guard.Draw(dc,PetOpacity);dc.Pop();
+            if(GuardStatus is { } status)
+            {
+                if(status!=previousStatus)
+                {
+                    statusText=new FormattedText(status,CultureInfo.GetCultureInfo("zh-CN"),FlowDirection.LeftToRight,
+                        new Typeface("Microsoft YaHei UI"),15,Brushes.White,VisualTreeHelper.GetDpi(this).PixelsPerDip);
+                    previousStatus=status;
+                }
+                if(statusText is { } text)
+                {
+                    var badge=new Rect(FormationBounds.X+(FormationBounds.Width-text.Width)/2-14,
+                        FormationBounds.Top+20,text.Width+28,text.Height+14);
+                    dc.DrawRoundedRectangle(statusBackground,null,badge,11,11);
+                    dc.DrawText(text,new Point(badge.Left+14,badge.Top+7));
+                }
+            }
+            return;
+        }
         dc.PushTransform(new TranslateTransform(FormationBounds.X,FormationBounds.Y));
         if(ExitAt.HasValue&&CancelActors==null)Scene.Draw(dc,Time,FormationBounds.Width,FormationBounds.Height,ExitAt);
         else if(Time<CountdownScene.ExitStart&&!ExitAt.HasValue)Scene.Draw(dc,Time,FormationBounds.Width,FormationBounds.Height);
@@ -238,10 +262,12 @@ sealed class CountdownWindow:Window
     readonly Window petOwner;
     readonly Action<double> blendPet;
     readonly GuardInput input=new();
+    readonly GuardPedalInput pedalInput=new();
     double last;
     Matrix previousMatrix;
     readonly double startAt;
     internal bool PollInput=true;
+    internal PedalBridge? Pedals {get;init;}
     internal GuardGame? Game=>view.Guard?.Game;
     internal string Phase=>view.Guard?.Game.State??(view.ExitAt.HasValue?"dismiss":view.Time<CountdownScene.ExitStart?"countdown":"scatter");
     public CountdownWindow(Window owner,Action<double>? blend=null,double startAt=0)
@@ -285,8 +311,17 @@ sealed class CountdownWindow:Window
                 for(int i=0;i<guard.Game.Returns.Count;i++){var r=guard.Game.Returns[i];guard.Game.Returns[i]=r with { Position=Rebase(r.Position) };}
             }
             previousMatrix=view.StageMatrix;
-            if(PollInput)input.Step(guard.Game,dt,view,inverse);
-            guard.Game.Step(dt);
+            bool ready=true;
+            if(Pedals is { } bridge)
+            {
+                if(PollInput)input.PollPause(guard.Game);
+                ready=pedalInput.Step(guard.Game,bridge.Read(),dt);
+                view.GuardStatus=guard.Game.State!="playing"?null:!ready?"等待双脚踏板恢复 · 已暂停":
+                    guard.Game.Paused?"已暂停 · Esc 继续":
+                    $"踏板守护 · 已踩中 {guard.Game.Hits} · 剩余 {Math.Ceiling(GuardGame.Duration-guard.Game.Elapsed):0} 秒";
+            }
+            else if(PollInput)input.Step(guard.Game,dt,view,inverse);
+            if(ready||guard.Game.State!="playing")guard.Game.Step(dt);
             double blend=guard.Game.State=="result"?1-Ease((guard.Game.ReactionAge-2)/.5):Ease(guard.Game.Clock/.4);
             view.PetOpacity=blend;blendPet(blend);
             if(guard.Game.Complete){Close();return;}

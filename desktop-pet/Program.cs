@@ -215,10 +215,13 @@ sealed class PetWindow : Window
     readonly PressEdge countdownKey=new(),quitKey=new(),resetKey=new();
     readonly bool pollKeys;
     PetShortcuts? shortcuts;
-    internal void StartCountdown(double startAt=0)
+    PedalBridge? pedals;
+    internal void StartCountdown(double startAt=0,PedalBridge? pedalInput=null)
     {
         if(countdown!=null)return;
-        countdown=new CountdownWindow(this,blend=>{pet.GuardBlend=blend;pet.InvalidateVisual();},startAt){PollInput=pollKeys};countdown.Closed+=(_,_)=>countdown=null;countdown.Show();
+        countdown=new CountdownWindow(this,blend=>{pet.GuardBlend=blend;pet.InvalidateVisual();},startAt)
+            {PollInput=pollKeys,Pedals=pedalInput};
+        countdown.Closed+=(_,_)=>countdown=null;countdown.Show();
     }
     void ResetPet()
     {
@@ -234,7 +237,7 @@ sealed class PetWindow : Window
         Content=pet;
         Loaded+=(_,_)=> { Position(); timer.Start(); };
         SourceInitialized+=(_,_)=>{if(pollKeys)shortcuts=new PetShortcuts(this,ResetPet,Close);};
-        Closed+=(_,_)=>{timer.Stop();shortcuts?.Dispose();};
+        Closed+=(_,_)=>{timer.Stop();shortcuts?.Dispose();pedals?.Dispose();pedals=null;};
         MouseLeftButtonDown+=(_,e)=> { if(e.ClickCount==2) { pet.Rig.Wave(); pet.HintUntil=pet.Rig.Clock+3; } else DragMove(); };
         var menu = new ContextMenu();
         void Item(string title, Action action) { var item=new MenuItem { Header=title }; item.Click+=(_,_)=>action(); menu.Items.Add(item); }
@@ -242,6 +245,12 @@ sealed class PetWindow : Window
         Item("打个招呼（双脚站稳时）",()=> { pet.Rig.Wave(); pet.HintUntil=pet.Rig.Clock+3; });
         Item("S · 小宠物倒计时",()=>StartCountdown());
         menu.Items.Add(new MenuItem{Header="守护：F/H 踩踏 · WASD/IJKL 移动 · Esc 暂停",IsEnabled=false});
+        Item("连接双脚踏板 · 打开接收页",ConnectPedals);
+        Item("踏板游玩 · 踩小人",StartPedalGame);
+        Item("切回日常键盘 L / R",()=>{
+            if(countdown?.Pedals!=null)countdown.ScatterAndClose();
+            pedals?.Dispose();pedals=null;
+        });
         Item("小队散场 / 结束守护并归位",()=>countdown?.ScatterAndClose());
         menu.Items.Add(new Separator());
         foreach(double size in new[]{300d,400d,520d}) { var selected=size; Item($"大小 · {size/4:0}%",()=> { double ground=Top+Height*566/640; Width=Height=selected; Top=ground-Height*566/640; }); }
@@ -257,12 +266,38 @@ sealed class PetWindow : Window
             if(quit&&shortcuts?.QuitRegistered!=true){Close();return;}
             if(reset&&shortcuts?.ResetRegistered!=true){ResetPet();return;}
             if(countdownKey.Sample(pollKeys&&!command&&(GetAsyncKeyState(0x53)&0x8000)!=0))StartCountdown();
-            pet.Rig.SetKeys(pollKeys&&!command&&(GetAsyncKeyState(0x4c)&0x8000)!=0,pollKeys&&!command&&(GetAsyncKeyState(0x52)&0x8000)!=0);
+            if(pedals is null)
+                pet.Rig.SetKeys(pollKeys&&!command&&(GetAsyncKeyState(0x4c)&0x8000)!=0,pollKeys&&!command&&(GetAsyncKeyState(0x52)&0x8000)!=0);
+            else if(pedals.Read() is {Ready:true} frame)
+                pet.Rig.SetKeys(frame.Left.Contact==PedalContact.On,frame.Right.Contact==PedalContact.On);
             pet.Rig.Step(dt);pet.Design.Step(pet.Rig,dt);pet.InvalidateVisual();
         };
         // Display changes cannot strand the pet on a disconnected monitor.
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged+=DisplayChanged;
         Closed+=(_,_)=>Microsoft.Win32.SystemEvents.DisplaySettingsChanged-=DisplayChanged;
+    }
+    void StartPedalGame()
+    {
+        if(countdown!=null)return;
+        if(pedals?.Read() is { } frame)
+        {
+            if(frame.Ready&&frame.HasMotion)StartCountdown(pedalInput:pedals);
+            else MessageBox.Show("请在已打开的踏板接收页确认两侧 USB 和校准已就绪。","踏板游玩");
+        }
+        else ConnectPedals();
+    }
+    async void ConnectPedals()
+    {
+        try
+        {
+            var bridge=pedals??=new PedalBridge();
+            string address=await bridge.PreferredPairingUrl();
+            if(ReferenceEquals(pedals,bridge))Process.Start(new ProcessStartInfo(address){UseShellExecute=true});
+        }
+        catch(Exception error) when (error is System.Net.HttpListenerException or System.ComponentModel.Win32Exception)
+        {
+            MessageBox.Show("无法打开踏板接收页。"+error.Message,"双脚踏板");
+        }
     }
     void DisplayChanged(object? sender,EventArgs e)=>Dispatcher.InvokeAsync(Position);
     void Position() { var a=SystemParameters.WorkArea; Left=a.Right-Width-30; Top=a.Bottom-Height*566/640; }
@@ -277,6 +312,7 @@ static class Program
         if(args.Contains("--smoke-guard")){CountdownWindow.SmokeGuard(args.Length>1?args[1]:"guard-test");return 0;}
         if(args.Contains("--smoke-flow")){GuardTests.SmokeFlow(args.Length>1?args[1]:"guard-test");return 0;}
         if(args.Contains("--test-controls")){ControlTests.Run(args.Length>1?args[1]:"controls-test");return 0;}
+        if(args.Contains("--test-pedals")){PedalTests.Run(args.Length>1?args[1]:"pedal-test");return 0;}
         if(args.Contains("--test-enhanced")){new OriginalDesign().ExportEnhanced(args.Length>1?args[1]:"enhanced-test");return 0;}
         if(args.Contains("--test-slime")){new OriginalDesign().ExportSlime(args.Length>1?args[1]:"slime-test");return 0;}
         if(args.Contains("--test-blink"))return CountdownScene.ExportBlink(args.Length>1?args[1]:"blink-test");

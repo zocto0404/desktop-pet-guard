@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="desktop-pet-pedals" content="M1">
+  <title>双脚踏板 · 桌宠守护</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main>
+    <header><p>桌宠守护</p><h1>双脚踏板</h1></header>
+    <p id="link" class="pet-link" role="status">请从桌宠右键菜单打开接收页。</p>
+    <section id="result" data-state="waiting" aria-live="polite">
+      <p>小人状态</p>
+      <h2 id="state">等待双脚就绪</h2>
+      <p>双脚就绪后，在桌宠右键菜单选择「踏板游玩 · 踩小人」。左右倾斜和前后压动来移动对应拖鞋，快速下踩击中附近的小人。</p>
+    </section>
+    <div id="pedals"></div>
+    <p class="hint">校准时每个姿势保持约 1.2 秒。踏板旋转后如果抬脚仍显示「踩住」，让空板停在这个角度，点「补录空板角度」。</p>
+  </main>
+  <script type="module" src="./relay.js"></script>
+</body>
+</html>

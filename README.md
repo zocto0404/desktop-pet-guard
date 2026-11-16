@@ -18,6 +18,15 @@
 
 右键菜单也可开始、提前结束、重置和退出。60 秒结束后小队撤退、部件归位，恢复日常桌宠，可再次按 S。拖动或缩放桌宠时，小队会追向新位置；屏幕底边处的脚踏和部件堆保持可见。
 
+## 双脚踏板游玩
+
+1. 用 USB 接两块已烧录 DA1 固件的 XIAO ESP32C3 + GY-521。关闭占用串口的其他踏板页面或串口监视器。
+2. 从桌宠右键菜单选择「连接双脚踏板 · 打开接收页」，在 Chrome 或 Edge 分别选择左、右 USB 串口。有已保存的校准时会沿用。首次连接时在每侧先记录空板，再记录自然踩住时的姿势。
+3. 看到「桌宠正在接收左右脚状态」后，保持接收页开启。日常桌宠会随双脚在板情况站稳、向左或右挣扎，或散开。
+4. 从桌宠右键菜单选择「踏板游玩 · 踩小人」。倒计时后开始 60 秒守护。倾斜任一踏板移动对应拖鞋，短促下踩击中拖鞋下方的小人。接收页可以调整两个方向和下踩灵敏度。USB 数据中断时对局会等待恢复。
+
+按 `S` 仍可进入原有键盘守护，右键「切回日常键盘 L / R」可恢复日常键盘控制。踏板接收页由桌宠在本机提供，无需单独运行 Vite。已有 DESK AWAY 校准的复用条件见 [踏板接入说明](desktop-pet/README.md#踏板接入)。
+
 运行包信息与 SHA256 见 [packages/README.md](packages/README.md)。原始拖鞋图已嵌入程序，无需保留聊天附件。
 
 ## 源码与构建
@@ -36,6 +45,7 @@ dotnet publish desktop-pet/DesktopPet.csproj -c Release -r win-x64 --self-contai
 dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-guard output/guard-qa
 dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-controls output/controls-qa
 dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --smoke-flow output/flow-qa
+dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-pedals output/pedal-qa
 ```
 
 已有验证记录保存在 [`docs/validation/`](docs/validation/)：完整实际窗口流程、倒计时连续交接、踩踏命中、暂停继续、部件归位、再次开始、重置 / 退出清理、拖鞋朝向与屏幕边缘约束。完整实际窗口流程约需 95 秒，测试窗口在屏幕外运行。
