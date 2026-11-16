@@ -30,7 +30,10 @@ static class GuardTests
         foreach(var (w,h) in new[]{(1920d,1080d),(1280d,1024d),(2560d,1080d)})
         {
             view.FormationBounds=new Rect(-320,20,w,h);
-            for(int i=0;i<60;i++)Assert(view.ScatterActor(i,2.2).Opacity==1,"Wide display scatter lost actor");
+            var spread=Enumerable.Range(0,60).Select(i=>view.ScatterActor(i,CountdownView.ScatterSeconds)).ToArray();
+            Assert(spread.All(a=>a.Opacity==1),"Wide display scatter lost actor");
+            Assert((spread.Max(a=>a.X)-spread.Min(a=>a.X))*view.FormationScale>w*.8&&
+                (spread.Max(a=>a.Y)-spread.Min(a=>a.Y))*view.FormationScale>h*.7,"Opening was not spread across the monitor");
         }
         view.FormationBounds=new Rect(0,0,1280,720);
         var scene=new GuardScene();view.SeedGuard(scene);var game=scene.Game;
@@ -38,22 +41,38 @@ static class GuardTests
         Assert(Enumerable.Range(0,3).All(type=>game.Actors.Count(a=>a.Type==type)==20),"Type order changed");
         for(int i=0;i<60;i++)
         {
-            var a=view.ScatterActor(i,2.2);var actor=game.Actors[i];
+            var a=view.ScatterActor(i,CountdownView.ScatterSeconds);var actor=game.Actors.Single(actor=>actor.Id==i);
             Assert(Math.Abs(actor.Position.X-a.X)<.001,"Handoff moved actor horizontally");
             Assert(Math.Abs(actor.Position.Y-a.Y-a.Bob-new[]{146d,156d,153d}[i%3]*a.Scale/2)<.001,"Center-to-feet handoff jumped");
         }
+        Assert(game.Actors.Count(a=>(a.Position-new Point(600,440)).Length<180)<10,"Opening actors crowd the pet");
         Save(Path.Combine(folder,"01-handoff.png"),1280,720,dc=>scene.Draw(dc));
+        var opening=game.Actors.ToDictionary(a=>a.Id,a=>a.Position);
+        var arrivals=new HashSet<int>();var edges=new HashSet<int>();
+        double lastArrival=0;
         int captures=0;
         for(int frame=0;frame<70*60;frame++)
         {
             game.Step(1d/60);
             Assert(game.Actors.All(a=>double.IsFinite(a.Position.X+a.Position.Y+a.Scale)),"Invalid actor motion");
+            if(frame<30)Assert(game.Actors.All(a=>a.Position==opening[a.Id]),"Opening group immediately rushed the pet");
+            if(frame==10*60)Assert(game.Actors.Count(a=>a.Id<60&&(a.Position-new Point(600,440)).Length>375)>=15,
+                "The opening crowd converged too early");
+            foreach(var a in game.Actors.Where(a=>a.Id>=60&&arrivals.Add(a.Id)))
+            {
+                var p=a.Position;var v=game.Viewport;
+                int edge=p.X<v.Left?0:p.X>v.Right?1:p.Y<v.Top?2:p.Y>v.Bottom?3:-1;
+                Assert(edge>=0&&game.Elapsed>=3&&game.Elapsed<55,"Reinforcement popped into view or out of sequence");
+                Assert(lastArrival==0||game.Elapsed-lastArrival is >.85 and <1.85,"Reinforcements formed an unintended batch or gap");
+                edges.Add(edge);lastArrival=game.Elapsed;
+            }
             if(new[]{3*60,10*60,17*60,30*60,45*60,59*60,64*60,68*60}.Contains(frame))
             {
                 Save(Path.Combine(folder,$"event-{frame/60:00}.png"),1280,720,dc=>scene.Draw(dc));captures++;
             }
         }
         Assert(game.Complete&&game.Missing.Count==0&&game.Actors.Count==0,"Event did not restore/finish");
+        Assert(edges.Count==4&&arrivals.Count>=30&&lastArrival>52,"Reinforcements did not continue across all four edges");
         Assert(game.Cursor==19,"Undefended event did not complete all 19 pickups: "+game.Cursor);
         // Contact happens at the bottom of the falling foot, never on initial press.
         var defense=new GuardGame();var victim=new GuardActor{Id=200,Type=1,Position=new(300,420),Speed=0};defense.Add(victim);
@@ -142,7 +161,7 @@ static class GuardTests
                 dc.DrawDrawing(scene.Art.Markup(scene.Art.MinionFrame(type,"walk",i%3*.17)));dc.Pop();dc.Pop();dc.Pop();
             }
         });
-        File.WriteAllText(Path.Combine(folder,"result.txt"),$"PASS: 60 continuous/opaque actors; 3 type mappings; monitor aspect ratios; center-to-feet handoff; full native 19-part event; delayed impacts; hold edges; pause; 148px foot separation; two-carrier rescue; cancellation at 4 damage stages; recovery and completion; all recorded pet/minion SVG poses compile; legless slime puddle, geometric collapse and empty final frame; {captures} event renders and minion contact sheets.");
+        File.WriteAllText(Path.Combine(folder,"result.txt"),$"PASS: 60 continuous/opaque actors; monitor-wide spread; staggered approach; {arrivals.Count} unique arrivals from all four edges; 3 type mappings; monitor aspect ratios; center-to-feet handoff; full native 19-part event; delayed impacts; hold edges; pause; 148px foot separation; two-carrier rescue; cancellation at 4 damage stages; recovery and completion; all recorded pet/minion SVG poses compile; legless slime puddle, geometric collapse and empty final frame; {captures} event renders and minion contact sheets.");
         return 0;
     }
     public static void SmokeFlow(string folder)
@@ -150,7 +169,7 @@ static class GuardTests
         Directory.CreateDirectory(folder);string progress=Path.Combine(folder,"flow-progress.txt");File.WriteAllText(progress,"");
         var owner=new PetWindow(pollKeys:false){Opacity=0,ShowInTaskbar=false,ShowActivated=false};
         var watch=Stopwatch.StartNew();var timer=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(100)};
-        var seen=new HashSet<string>();string previous="";bool paused=false,resumed=false,stomped=false,released=false,restarted=false;
+        var seen=new HashSet<string>();string previous="";bool paused=false,resumed=false,stomped=false,released=false,restarted=false,arrived=false;
         double pauseAt=0,pauseElapsed=0,stompAt=0;int hitBefore=0;
         var pet=(PetView)owner.Content;
         MenuItem StartItem()=>pet.ContextMenu.Items.OfType<MenuItem>().Single(i=>(string?)i.Header=="S · 小宠物倒计时");
@@ -177,18 +196,19 @@ static class GuardTests
                 if(!restarted)
                 {
                     foreach(string phase in new[]{"countdown","scatter","playing","ending","result"})Assert(seen.Contains(phase),"Flow skipped "+phase);
-                    Assert(paused&&resumed&&stomped&&released,"Flow did not exercise defense/pause");
+                    Assert(paused&&resumed&&stomped&&released&&arrived,"Flow did not exercise defense/pause and live reinforcements");
                     Record("daily-restored");restarted=true;Begin();Assert(Active()!.Game==null,"Restart reused damaged guard scene");Active()!.ScatterAndClose();
                 }
                 else
                 {
                     Record("ready-again");timer.Stop();
-                    File.WriteAllText(Path.Combine(folder,"flow-result.txt"),"PASS: actual PetWindow menu starts one event; full 5-4-3-2-1 countdown; opaque scatter; same 60 actors attack; main pet hides; F/H simulation lands a hit; pause/resume freezes time; 60-second event ends; all parts return; overlay closes; daily pet reappears; event restarts cleanly; early scatter closes and returns to ready.");owner.Close();
+                    File.WriteAllText(Path.Combine(folder,"flow-result.txt"),"PASS: actual PetWindow menu starts one event; full 5-4-3-2-1 countdown; opaque monitor-wide scatter; continuous handoff and edge arrivals; main pet hides; F/H simulation lands a hit; pause/resume freezes time; 60-second event ends; all parts return; overlay closes; daily pet reappears; event restarts cleanly; early scatter closes and returns to ready.");owner.Close();
                 }
                 return;
             }
             Record(overlay.Phase);
             if(overlay.Game is not { } game||game.State!="playing"||restarted)return;
+            arrived|=game.Actors.Any(a=>a.Id>=60);
             if(game.Elapsed>.6&&!paused)
             {
                 Assert(game.Actors.Count==60,"Real countdown handoff lost actors");Assert(pet.GuardBlend>.99,"Main pet did not hide for guard");

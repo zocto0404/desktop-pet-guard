@@ -171,7 +171,7 @@ sealed class CountdownView:FrameworkElement
     public readonly CountdownScene Scene=new();
     public double Time;
     public double? ExitAt;
-    public const double ScatterSeconds=2.2;
+    public const double ScatterSeconds=3.1;
     public Rect FormationBounds;
     public GuardScene? Guard;
     public Matrix StageMatrix=Matrix.Identity;
@@ -181,30 +181,67 @@ sealed class CountdownView:FrameworkElement
     FormattedText? statusText;
     static readonly Brush statusBackground = new SolidColorBrush(Color.FromArgb(235,48,45,70));
     public CountdownScene.Actor[]? CancelActors;
+    Size scatterSize;
+    Point[]? scatterTargets;
     static double Ease(double t){t=Math.Clamp(t,0,1);return t*t*(3-2*t);}
     public double FormationScale=>Math.Min(FormationBounds.Width/1280,FormationBounds.Height/720);
     public Point FormationOrigin=>new(FormationBounds.X+(FormationBounds.Width-1280*FormationScale)/2,FormationBounds.Y+(FormationBounds.Height-720*FormationScale)/2);
+    Point ScatterTarget(int index)
+    {
+        var size=FormationBounds.Size;
+        if(scatterTargets is null||scatterSize!=size)
+        {
+            scatterSize=size;
+            scatterTargets=new Point[CountdownScene.Count];
+            const int columns=10, rows=6;
+            var start=Enumerable.Range(0,CountdownScene.Count)
+                .Select(i=>(Index:i,Pose:Scene.At(i,CountdownScene.ExitStart-.00001,size.Width,size.Height)))
+                .OrderBy(a=>a.Pose.Y).Chunk(columns).ToArray();
+            double width=size.Width/FormationScale,height=size.Height/FormationScale;
+            for(int row=0;row<rows;row++)
+            {
+                var line=start[row].OrderBy(a=>a.Pose.X).ToArray();
+                for(int column=0;column<columns;column++)
+                {
+                    int i=line[column].Index;
+                    double x=(column+.5+Math.Sin(i*17.3)*.24)/columns;
+                    double y=(row+.5+Math.Cos(i*11.1)*.24)/rows;
+                    scatterTargets[i]=new(640+(x-.5)*(width-96),360+(y-.5)*(height-112));
+                }
+            }
+        }
+        return scatterTargets[index];
+    }
     public CountdownScene.Actor ScatterActor(int i,double age)
     {
         var a=Scene.At(i,CountdownScene.ExitStart-.00001,FormationBounds.Width,FormationBounds.Height);
-        double angle=i*2.399963,spread=145+i%5*19,scale=FormationScale;
-        // Scatter inside the visible monitor. Everyone remains fully opaque and on screen.
-        double x=Math.Clamp(a.X+Math.Cos(angle)*spread,640-FormationBounds.Width/scale/2+30,640+FormationBounds.Width/scale/2-30);
-        double y=Math.Clamp(a.Y+Math.Sin(angle)*spread,360-FormationBounds.Height/scale/2+35,360+FormationBounds.Height/scale/2-35);
-        double u=Ease(age/ScatterSeconds),stride=age*9+i*1.8;
-        return a with { X=a.X+(x-a.X)*u,Y=a.Y+(y-a.Y)*u,Angle=Math.Sin(stride)*4,Leg=Math.Sin(stride)*32,Bob=-Math.Abs(Math.Sin(stride))*4,Face=x<a.X?-1:1,Opacity=1 };
+        var target=ScatterTarget(i);
+        double delay=i%7*.065;
+        double u=Ease((age-delay)/(ScatterSeconds-delay)),stride=age*9+i*1.8;
+        double walk=Ease((age-delay)/.25);
+        return a with { X=a.X+(target.X-a.X)*u,Y=a.Y+(target.Y-a.Y)*u,Angle=Math.Sin(stride)*4*walk,
+            Leg=Math.Sin(stride)*32*walk,Bob=-Math.Abs(Math.Sin(stride))*4*walk,Face=target.X<a.X?-1:1,Opacity=1 };
     }
     public void SeedGuard(GuardScene guard)
     {
         var inverse=StageMatrix;inverse.Invert();var origin=FormationOrigin;double scale=FormationScale;
+        var opening=new List<GuardActor>(CountdownScene.Count);
         for(int i=0;i<CountdownScene.Count;i++)
         {
             var a=ScatterActor(i,ScatterSeconds);
             // The countdown anchors the center; the attack animation anchors the feet.
             double height=new[]{146d,156d,153d}[i%3];
             var p=inverse.Transform(new Point(origin.X+a.X*scale,origin.Y+(a.Y+a.Bob+height*a.Scale/2)*scale));
-            guard.Game.Add(new GuardActor { Id=i,Type=i%3,Position=p,Scale=a.Scale*scale/StageMatrix.M11,Side=p.X<600?-1:1,Face=a.Face,Speed=110+i%7*5,Phase=(ScatterSeconds*9+i*1.8)/(2*Math.PI) });
+            opening.Add(new GuardActor { Id=i,Type=i%3,Position=p,Scale=a.Scale*scale/StageMatrix.M11,Side=p.X<600?-1:1,
+                Face=a.Face,Speed=108+i%7*5,Phase=(ScatterSeconds*9+i*1.8)/(2*Math.PI),ApproachAt=.75+(i*17%60)*.13 });
         }
+        var pet=new Point(600,430);
+        foreach(var actor in opening.OrderBy(a=>a.ApproachAt+(a.Position-pet).Length/a.Speed))
+        {
+            guard.Game.Add(actor);
+            if(actor.Job<0)actor.ApproachAt+=5+(actor.Id*11%17)*.67;
+        }
+        guard.Game.ScheduleArrivals(CountdownScene.Count);
         Guard=guard;
     }
     protected override void OnRender(DrawingContext dc)
@@ -302,7 +339,8 @@ sealed class CountdownWindow:Window
         {
             // Preserve each actor's desktop position while its target (the owner) is dragged/resized.
             var inverse=view.StageMatrix;inverse.Invert();
-            guard.Game.SetViewport(new Rect(inverse.Transform(new Point(0,0)),inverse.Transform(new Point(Width,Height))));
+            guard.Game.SetViewport(new Rect(inverse.Transform(new Point(0,0)),inverse.Transform(new Point(Width,Height))),
+                new Rect(inverse.Transform(view.FormationBounds.TopLeft),inverse.Transform(view.FormationBounds.BottomRight)));
             if(previousMatrix!=view.StageMatrix)
             {
                 Point Rebase(Point p)=>inverse.Transform(previousMatrix.Transform(p));

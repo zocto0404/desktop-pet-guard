@@ -9,7 +9,7 @@ sealed class GuardActor
 {
     public int Id, Type, Job = -1, Side, Face = 1;
     public Point Position;
-    public double Speed, Phase, Scale = .35, DeathAge;
+    public double Speed, Phase, Scale = .35, DeathAge, ApproachAt;
     public string Mode = "walk";
     public bool Dead;
 }
@@ -30,7 +30,7 @@ sealed record GuardReturn(int Part, Point Position, double Duration) { public do
 sealed record GuardRing(Point Position, bool Left) { public double Age; }
 
 // Native port of desktop-pet-guard's input-independent 60-second simulation.
-// The countdown supplies all 60 living actors; none are replaced or respawned.
+// The countdown supplies the opening actors. Reinforcements always get new identities.
 sealed class GuardGame
 {
     public readonly GuardPart[] Parts;
@@ -51,6 +51,9 @@ sealed class GuardGame
     public double GroundLift;
     public const double Duration = 60, DebrisDuration = 4;
     Queue<int> restore = new(); double restoreIn;
+    Rect? arrivalBounds;
+    double nextArrival = double.PositiveInfinity;
+    int firstArrivalId, nextArrivalId;
     public bool Complete => State == "complete";
     public GuardGame()
     {
@@ -71,17 +74,40 @@ sealed class GuardGame
         var job = Jobs.FirstOrDefault(j => j.Status == "waiting" && j.Members.Count < Parts[j.Part].People);
         actor.Job = job?.Part ?? -1; job?.Members.Add(actor.Id); Actors.Add(actor);
     }
+    public void ScheduleArrivals(int firstId)
+    {
+        firstArrivalId = nextArrivalId = firstId;
+        nextArrival = 3.2;
+    }
+    void AdmitArrival()
+    {
+        var bounds = arrivalBounds ?? Viewport;
+        int id = nextArrivalId++;
+        int order = id - firstArrivalId;
+        double fraction = .1 + .8 * (order * .61803398875 % 1);
+        var start = (order % 4) switch
+        {
+            0 => new Point(bounds.Left - 44, bounds.Top + bounds.Height * fraction),
+            1 => new Point(bounds.Left + bounds.Width * fraction, bounds.Bottom + 70),
+            2 => new Point(bounds.Right + 44, bounds.Top + bounds.Height * fraction),
+            _ => new Point(bounds.Left + bounds.Width * fraction, bounds.Top - 18),
+        };
+        int side = start.X < 600 ? -1 : 1;
+        Add(new GuardActor { Id = id, Type = id % 3, Position = start, Side = side, Face = -side,
+            Speed = 99 + id % 8 * 5, Scale = .32, Phase = id * .287 });
+        nextArrival += .92 + (order * 7 % 11) * .087;
+    }
     public Point Target(GuardActor a)
     {
         Point Fit(double x,double y)=>new(Math.Clamp(x,Viewport.Left+35,Viewport.Right-35),Math.Min(y,Viewport.Bottom-8));
-        if (a.Job < 0)
+        if (a.Job < 0 || a.Job > Cursor + 2)
         {
-            // Extra countdown members visibly encircle the pet and take over interrupted jobs.
+            // Leave space between the actors waiting for the next part to become available.
             double angle = a.Id * 2.399963;
-            return Fit(600 + Math.Cos(angle) * (155 + a.Id % 3 * 20), 434 + Math.Sin(angle) * 58-GroundLift);
+            return Fit(600 + Math.Cos(angle) * (248 + a.Id % 5 * 24),
+                Math.Max(Viewport.Top + 48, 415 + Math.Sin(angle) * (82 + a.Id % 3 * 23) - GroundLift));
         }
         var job = Jobs[a.Job]; var p = Parts[a.Job]; int i = job.Members.IndexOf(a.Id);
-        if (a.Job > Cursor + 1) return Fit(600 + a.Side * (160 + a.Id % 4 * 36), 465 + a.Id % 3 * 10-GroundLift);
         if (Collapsed) return Fit(600 + Scatter[a.Job][0] + (i - (p.People - 1) / 2d) * 42, 450 + Scatter[a.Job][1] + i % 2 * 10-GroundLift);
         if (p.Style == "wide") return Fit(600 + (a.Job == 5 ? -75 : 63) + (i - .5) * 58, 414 + i * 16);
         if (p.Style == "stack") return Fit(609, 414);
@@ -96,9 +122,9 @@ sealed class GuardGame
         double top=Math.Max(312,Viewport.Top+104),bottom=Math.Min(500,Viewport.Bottom-12);
         f.X = Math.Clamp(x, low, high); f.Y = top<=bottom?Math.Clamp(y,top,bottom):Math.Clamp(y,312,500);
     }
-    public void SetViewport(Rect area)
+    public void SetViewport(Rect area, Rect? arrivalArea = null)
     {
-        Viewport=area;Aim(true,LeftFoot.X,LeftFoot.Y);Aim(false,RightFoot.X,RightFoot.Y);
+        Viewport=area;arrivalBounds=arrivalArea;Aim(true,LeftFoot.X,LeftFoot.Y);Aim(false,RightFoot.X,RightFoot.Y);
     }
     public void Move(bool left, double x, double y, double dt)
     {
@@ -177,6 +203,7 @@ sealed class GuardGame
         if (State == "playing")
         {
             Elapsed += dt; if (Elapsed >= Duration) { Elapsed = Duration; BeginEnding(); return; }
+            if (Elapsed >= nextArrival && Elapsed < Duration - 5) AdmitArrival();
             // Surviving members, rather than newly spawned replacements, fill vacant tasks.
             foreach (var a in Actors.Where(a => !a.Dead && a.Job < 0 && a.Mode != "retreat"))
             {
@@ -186,6 +213,8 @@ sealed class GuardGame
             foreach (var a in Actors)
             {
                 if (a.Dead) { a.DeathAge += dt; continue; }
+                a.Scale += (.35 - a.Scale) * (1 - Math.Exp(-dt * 2.8));
+                if (Elapsed < a.ApproachAt) { a.Mode = "wait"; continue; }
                 var old = a.Position;
                 if (a.Mode is "carry" or "retreat") a.Position = new(a.Position.X + a.Side * a.Speed * (a.Mode == "retreat" ? 1.9 : .72) * dt, a.Position.Y);
                 else
@@ -195,7 +224,6 @@ sealed class GuardGame
                     else a.Mode = "wait";
                 }
                 if (Math.Abs(a.Position.X - old.X) > .02) a.Face = a.Position.X < old.X ? -1 : 1;
-                a.Scale += (.35 - a.Scale) * (1 - Math.Exp(-dt * 2.8));
             }
             if (Cursor < Jobs.Length)
             {
