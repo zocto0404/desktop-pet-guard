@@ -1,0 +1,1 @@
+PASS: supplied transparent left/right slippers render with original orientation; down/up timing and heel clearance; native shortcut message invokes real menu actions; reset during paused/damaged attack closes overlay, replaces pet state, restores size/topmost/position and allows restart; reset during countdown; quit closes owner and owned windows.

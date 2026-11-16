@@ -1,0 +1,1 @@
+PASS: actual PetWindow menu starts one event; full 5-4-3-2-1 countdown; opaque scatter; same 60 actors attack; main pet hides; F/H simulation lands a hit; pause/resume freezes time; 60-second event ends; all parts return; overlay closes; daily pet reappears; event restarts cleanly; early scatter closes and returns to ready.

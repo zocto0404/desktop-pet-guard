@@ -1,3 +1,11 @@
 node_modules/
 .local/
 *.log
+
+# Native Windows desktop pet: ignore generated build/test output.
+/desktop-pet/bin/
+/desktop-pet/obj/
+/output/
+/publish/
+/tmp/
+*.pdb

@@ -1,0 +1,816 @@
+{
+  "fps": 24,
+  "format": "Pre-recorded vector animation frames; transparent; no background. Runtime uses sprites.json.",
+  "animations": [
+    {
+      "name": "pet-stage-0-idle",
+      "path": "assets/frames-v2/pet-stage-0-idle.svg",
+      "count": 168,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-1-idle",
+      "path": "assets/frames-v2/pet-stage-1-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-2-idle",
+      "path": "assets/frames-v2/pet-stage-2-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-3-idle",
+      "path": "assets/frames-v2/pet-stage-3-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-4-idle",
+      "path": "assets/frames-v2/pet-stage-4-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-5-idle",
+      "path": "assets/frames-v2/pet-stage-5-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-6-idle",
+      "path": "assets/frames-v2/pet-stage-6-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-7-idle",
+      "path": "assets/frames-v2/pet-stage-7-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-8-idle",
+      "path": "assets/frames-v2/pet-stage-8-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-9-idle",
+      "path": "assets/frames-v2/pet-stage-9-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-10-idle",
+      "path": "assets/frames-v2/pet-stage-10-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-11-idle",
+      "path": "assets/frames-v2/pet-stage-11-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-12-idle",
+      "path": "assets/frames-v2/pet-stage-12-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-13-idle",
+      "path": "assets/frames-v2/pet-stage-13-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-14-idle",
+      "path": "assets/frames-v2/pet-stage-14-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-15-idle",
+      "path": "assets/frames-v2/pet-stage-15-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-16-idle",
+      "path": "assets/frames-v2/pet-stage-16-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-17-idle",
+      "path": "assets/frames-v2/pet-stage-17-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-18-idle",
+      "path": "assets/frames-v2/pet-stage-18-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-stage-19-idle",
+      "path": "assets/frames-v2/pet-stage-19-idle.svg",
+      "count": 36,
+      "w": 600,
+      "h": 600,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "pet-1-prepare",
+      "path": "assets/frames-v2/pet-1-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-1-pull",
+      "path": "assets/frames-v2/pet-1-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-1-after",
+      "path": "assets/frames-v2/pet-1-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-2-prepare",
+      "path": "assets/frames-v2/pet-2-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-2-pull",
+      "path": "assets/frames-v2/pet-2-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-2-after",
+      "path": "assets/frames-v2/pet-2-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-3-prepare",
+      "path": "assets/frames-v2/pet-3-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-3-pull",
+      "path": "assets/frames-v2/pet-3-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-3-after",
+      "path": "assets/frames-v2/pet-3-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-4-prepare",
+      "path": "assets/frames-v2/pet-4-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-4-pull",
+      "path": "assets/frames-v2/pet-4-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-4-after",
+      "path": "assets/frames-v2/pet-4-after.svg",
+      "count": 72,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-5-prepare",
+      "path": "assets/frames-v2/pet-5-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-5-pull",
+      "path": "assets/frames-v2/pet-5-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-5-after",
+      "path": "assets/frames-v2/pet-5-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-6-prepare",
+      "path": "assets/frames-v2/pet-6-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-6-pull",
+      "path": "assets/frames-v2/pet-6-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-6-after",
+      "path": "assets/frames-v2/pet-6-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-7-prepare",
+      "path": "assets/frames-v2/pet-7-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-7-pull",
+      "path": "assets/frames-v2/pet-7-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-7-after",
+      "path": "assets/frames-v2/pet-7-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-8-prepare",
+      "path": "assets/frames-v2/pet-8-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-8-pull",
+      "path": "assets/frames-v2/pet-8-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-8-after",
+      "path": "assets/frames-v2/pet-8-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-9-prepare",
+      "path": "assets/frames-v2/pet-9-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-9-pull",
+      "path": "assets/frames-v2/pet-9-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-9-after",
+      "path": "assets/frames-v2/pet-9-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-10-prepare",
+      "path": "assets/frames-v2/pet-10-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-10-pull",
+      "path": "assets/frames-v2/pet-10-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-10-after",
+      "path": "assets/frames-v2/pet-10-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-11-prepare",
+      "path": "assets/frames-v2/pet-11-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-11-pull",
+      "path": "assets/frames-v2/pet-11-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-11-after",
+      "path": "assets/frames-v2/pet-11-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-12-prepare",
+      "path": "assets/frames-v2/pet-12-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-12-pull",
+      "path": "assets/frames-v2/pet-12-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-12-after",
+      "path": "assets/frames-v2/pet-12-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-13-prepare",
+      "path": "assets/frames-v2/pet-13-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-13-pull",
+      "path": "assets/frames-v2/pet-13-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-13-after",
+      "path": "assets/frames-v2/pet-13-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-14-prepare",
+      "path": "assets/frames-v2/pet-14-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-14-pull",
+      "path": "assets/frames-v2/pet-14-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-14-after",
+      "path": "assets/frames-v2/pet-14-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-15-prepare",
+      "path": "assets/frames-v2/pet-15-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-15-pull",
+      "path": "assets/frames-v2/pet-15-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-15-after",
+      "path": "assets/frames-v2/pet-15-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-16-prepare",
+      "path": "assets/frames-v2/pet-16-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-16-pull",
+      "path": "assets/frames-v2/pet-16-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-16-after",
+      "path": "assets/frames-v2/pet-16-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-17-prepare",
+      "path": "assets/frames-v2/pet-17-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-17-pull",
+      "path": "assets/frames-v2/pet-17-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-17-after",
+      "path": "assets/frames-v2/pet-17-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-18-prepare",
+      "path": "assets/frames-v2/pet-18-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-18-pull",
+      "path": "assets/frames-v2/pet-18-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-18-after",
+      "path": "assets/frames-v2/pet-18-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-19-prepare",
+      "path": "assets/frames-v2/pet-19-prepare.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-19-pull",
+      "path": "assets/frames-v2/pet-19-pull.svg",
+      "count": 20,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "pet-19-after",
+      "path": "assets/frames-v2/pet-19-after.svg",
+      "count": 32,
+      "w": 600,
+      "h": 600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "body-soft-carry-0",
+      "path": "assets/frames-v2/body-soft-carry-0.svg",
+      "count": 24,
+      "w": 420,
+      "h": 380,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "body-soft-carry-1",
+      "path": "assets/frames-v2/body-soft-carry-1.svg",
+      "count": 24,
+      "w": 420,
+      "h": 380,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "body-soft-carry-2",
+      "path": "assets/frames-v2/body-soft-carry-2.svg",
+      "count": 24,
+      "w": 420,
+      "h": 380,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "body-soft-carry-3",
+      "path": "assets/frames-v2/body-soft-carry-3.svg",
+      "count": 24,
+      "w": 420,
+      "h": 380,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-1-walk",
+      "path": "assets/frames-v2/minion-1-walk.svg",
+      "count": 24,
+      "w": 230,
+      "h": 250,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-1-carry",
+      "path": "assets/frames-v2/minion-1-carry.svg",
+      "count": 24,
+      "w": 230,
+      "h": 250,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-1-crushed",
+      "path": "assets/frames-v2/minion-1-crushed.svg",
+      "count": 96,
+      "w": 2600,
+      "h": 1600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "minion-2-walk",
+      "path": "assets/frames-v2/minion-2-walk.svg",
+      "count": 24,
+      "w": 230,
+      "h": 250,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-2-carry",
+      "path": "assets/frames-v2/minion-2-carry.svg",
+      "count": 24,
+      "w": 230,
+      "h": 250,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-2-crushed",
+      "path": "assets/frames-v2/minion-2-crushed.svg",
+      "count": 96,
+      "w": 2600,
+      "h": 1600,
+      "loop": false,
+      "fps": 24
+    },
+    {
+      "name": "minion-3-walk",
+      "path": "assets/frames-v2/minion-3-walk.svg",
+      "count": 24,
+      "w": 230,
+      "h": 250,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-3-carry",
+      "path": "assets/frames-v2/minion-3-carry.svg",
+      "count": 24,
+      "w": 230,
+      "h": 250,
+      "loop": true,
+      "fps": 24
+    },
+    {
+      "name": "minion-3-crushed",
+      "path": "assets/frames-v2/minion-3-crushed.svg",
+      "count": 96,
+      "w": 2600,
+      "h": 1600,
+      "loop": false,
+      "fps": 24
+    }
+  ]
+}

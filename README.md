@@ -1,55 +1,49 @@
-# 透明桌宠互动 · v2.6.2
+# 桌宠守护 · Windows 整合版
 
-体验链接：https://pet-guard-sixty-20261115.zocto0404.chatgpt.site
+这个仓库保存当前可运行的 Windows 桌宠：redcowork 日常桌宠、5→4→3→2→1 小队倒计时、60 秒踩踏守护、部件归位，以及用户提供的左右拖鞋。
 
-场景只有角色、实心半透明脚踏椭圆和短暂踩踏冲击。没有游戏 UI、Logo、水印、文字、地面底图和结算面板。角色直接来自用户 SVG；参考 GIF 只作为动作参考，没有把 GIF 的黑色背景带入角色素材。
+## 下载运行
 
-## Windows 桌面运行
+下载 [Windows 运行包](packages/desktop-pet-windows.zip)，完整解压后双击 `WobblyPet.exe`。请保留同目录 DLL、deps 和 runtimeconfig 文件。需要 Windows 10 / 11 x64 和 .NET 9 Windows Desktop Runtime。
 
-解压 `Windows透明桌宠.zip` 到任意目录，双击 `桌宠.exe`。无需安装或联网。保留 exe 周围的资源文件，不能只拷贝 exe。
+| 操作 | 动作 |
+| --- | --- |
+| S | 启动倒计时；同一批 60 只小人保持可见，散开后向桌宠当前位置聚拢攻击 |
+| L / R | 日常桌宠左右脚支撑 |
+| F / H | 守护时左 / 右拖鞋踩踏，落地时才判定命中 |
+| WASD / IJKL | 守护时移动左 / 右脚；鼠标可瞄准所在一侧的脚 |
+| Esc | 守护时暂停 / 继续 |
+| Ctrl + Alt + R | 重置桌宠和当前事件，恢复初始大小、置顶和位置 |
+| Ctrl + Alt + Q | 退出桌宠及倒计时 / 守护窗口 |
 
-窗口无边框、无背景、无阴影、置顶；背景使用真实 RGBA 透明。空白上方区域可穿透到后方桌面。Shift + 拖动移动桌宠窗口。右键点击桌宠角色，选择“退出桌宠”；或右键系统托盘的桌宠图标退出。关闭也可用 Alt+F4 或 Ctrl+Alt+Q。如旧版无法退出，双击“关闭桌宠.exe”，仅结束本桌宠进程。Ctrl+Alt+P 开始一局。
+右键菜单也可开始、提前结束、重置和退出。60 秒结束后小队撤退、部件归位，恢复日常桌宠，可再次按 S。拖动或缩放桌宠时，小队会追向新位置；屏幕底边处的脚踏和部件堆保持可见。
 
-浏览器体验使用同一份透明场景。浏览器自身的窗口底色由浏览器控制；Windows 运行版才能真正把角色直接叠在桌面上。
+运行包信息与 SHA256 见 [packages/README.md](packages/README.md)。原始拖鞋图已嵌入程序，无需保留聊天附件。
 
-## 操作（说明只在此文档中，场景内不显示）
+## 源码与构建
 
-- 点击角色/场地，按 Enter，或按 F/H：开始一局。3 秒准备动作后进入 60 秒守护。
-- 左脚 W/A/S/D：前/左/后/右倾；F 踩下，松开抬脚。
-- 右脚 I/J/K/L：前/左/后/右倾；H 踩下，松开抬脚。
-- 移动鼠标瞄准；左键左脚，右键右脚。按下后椭圆从上方落地，接触时才判定踩中，按住保持落地，松开弹回上方。
-- Esc 暂停/继续。Windows 运行版不会因为点击后方应用而暂停；浏览器切换标签页会暂停。
-- 结束后小人撤退、部件飞回、桌宠以鞠躬和爱心回应，随后回到活泼待机。没有文字结算。
+当前 Windows 主程序在 [`desktop-pet/`](desktop-pet/README.md)，使用 .NET 9 / WPF 原生透明窗口，不依赖网页或 Electron。完整构建、动作生成与测试说明见该目录的 README。
 
-## 帧动画
-
-`dist/assets/sprites.json` 是实际播放的预生成 SVG 帧，不是未使用的素材。原始几何只定义一次，每帧使用矢量引用、变换、重绘的手臂/嘴巴路径组成，保留透明和抗锯齿边缘。
-
-共 90 段、2,788 帧，24 fps：20 种完整/受损阶段待机；19 个部位各自的准备、拆卸、拆后反应；3 种小人的走路、搬运和踩后散架。脚踏下落、回弹也使用预计算帧。循环动作按整周期采样，不重复终帧。
-
-`dist/assets/frames-v2/` 是可独立查看的透明 SVG 帧条；`animation-manifest.json` 记录每帧宽高、帧数、帧率和是否循环。帧条横向从左到右播放。拆卸动作不是循环，应播完进入下一阶段。`tools/motion.mjs` 定义各阶段动作，`tools/frames.mjs` 重新生成所有帧。生成命令：`node tools/frames.mjs`。
-
-拆卸顺序：杯子 → 帽子和帽沿 → 左腿 → 右腿 → 蝴蝶结 → 左外套 → 右外套 → 衣领 → 右手臂 → 身体块1 → 左手臂 → 右瞳孔 → 身体块2 → 右眼白 → 身体块3 → 左瞳孔 → 身体块4 → 左眼白 → 嘴巴。帽子 2 人叠站，外套 2 人合抬；粉色主体分为4块，各由1人搬运，穿插在后期拆件中，分别不早于28、35、42、48秒开始拆取。
-
-## 继续修改和接入硬件
-
-`dist/engine.js` 独立管理游戏逻辑；`dist/art.js` 选择预生成帧、摆放角色；`dist/app.js` 接键盘、鼠标和硬件；`desktop/` 是 Electron 透明窗口容器。
-
-运行网页：`node tools/serve.mjs`，打开 http://127.0.0.1:4173。运行逻辑检查：`node tools/test.mjs`。桌面容器可用 Electron 运行 `desktop` 目录；便携包已经附带运行时。`desktop/runtime.json` 记录运行时版本和 SHA256；`tools/package-desktop.mjs` 校验官方校验和、打包并编译 Windows 启动器。
-
-Windows 启动器为兼容受限目录固定传入 `--no-sandbox`；容器只加载随包的本地内容，拒绝远程导航和网络资源，关闭渲染器 Node 集成，开启上下文隔离。硬件桥接应继续保留这些来源限制。
-
-```js
-window.deskPet.setPedal('left', {tiltX: -.5, tiltY: .2, pressure: .8});
-window.deskPet.setPedal('right', {tiltX: 0, tiltY: 0, pressure: 0});
-// tiltX: -1 左 / +1 右；tiltY: -1 前 / +1 后；pressure: 0..1。
-// 压力达到 0.6 踩下，低于 0.4 松开；滞回避免压力抖动重复踩。
+```powershell
+dotnet build desktop-pet/DesktopPet.csproj -c Release
+dotnet run --project desktop-pet/DesktopPet.csproj -c Release
+dotnet publish desktop-pet/DesktopPet.csproj -c Release -r win-x64 --self-contained false -o publish/desktop-pet
 ```
 
-也可发送 `deskpet:pedal` 自定义事件。真实硬件读取后调用此接口；断连时发送双脚全零。无需修改动画和游戏逻辑。
+## 验证
 
-运行时依据 Electron 官方透明窗口选项构建：https://www.electronjs.org/docs/latest/tutorial/custom-window-styles
+```powershell
+dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-guard output/guard-qa
+dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --test-controls output/controls-qa
+dotnet run --project desktop-pet/DesktopPet.csproj -c Release -- --smoke-flow output/flow-qa
+```
 
-本次更新：小人间隔从约 1.05–1.40 秒缩短到 0.38–0.56 秒，行进速度提高，最后 12 秒仍逐步收尾；左右脚始终保持至少 148 像素间距，键盘、鼠标和硬件接口共用同一约束。完整待机为 7 秒循环，双脚站稳，只间歇眨眼、看杯子、抬手；受损后逐渐摇晃，缺腿后明显失衡。表情增加惊讶、抿嘴、歪嘴、挤眼，五官脱落后下坠、弹动和追视。
+已有验证记录保存在 [`docs/validation/`](docs/validation/)：完整实际窗口流程、倒计时连续交接、踩踏命中、暂停继续、部件归位、再次开始、重置 / 退出清理、拖鞋朝向与屏幕边缘约束。完整实际窗口流程约需 95 秒，测试窗口在屏幕外运行。
 
-最终动画：摔倒段重绘为72帧，完整粉色身体预备压缩、空翻、落地压扁，上缘如液体般滞后回落，并有短促飞溅和衰减回弹；此时身体保持一整块。后续拆件才分四次取走粉色身体，剩余软团使用逐帧变化的三次贝塞尔曲线，保留弧线边缘和拉伸变形，搬运中也会弹动。五官留在堆的前下方随挤压眨眼、追视和变换嘴形；桌宠全部2,260帧均无牙齿和空心圆形O嘴，摔倒72帧只使用平线、小弧线、歪笑与浅笑，眯眼表情进入待机和受损反应。小人被踩后身体和五官保持完整，起飞后双腿分别脱离；身体与双腿仍落在远离踩踏位置的地方。落地后的动画帧由独立的重力、碰撞、反弹系数、摩擦和角速度模拟生成：身体二次反弹并逐渐滚停，两条腿在不同时间碰地、改变旋转方向并各自停下。踩踏脚踏压扁、回弹动画维持约0.75秒，保留短促锯齿冲击线；没有成团扬尘。
+## 原网页 / Electron 版本与备份
+
+原有 `dist/`、`desktop/`、`tools/`、`package.json` 和站点配置保留在原路径。原说明移至 [docs/legacy-web-desktop.md](docs/legacy-web-desktop.md)。原网页版本仍可通过 `npm start` 运行。
+
+本次整合基于旧 `main` 提交 `db31ddc7bd8c3d7c350cfb816b86a0bfa005ec64`；对应备份分支名为 `backup/main-before-native-20261116`，更新 `main` 前需先完成该远端备份。原 `main` 的历史保留为本次提交的祖先，不改写历史。
+
+Windows 整合源码来自 [mutuxiang/redcowork](https://github.com/mutuxiang/redcowork) 的 `feat/countdown-pet-guard` 分支，源提交 `5675aee`。守护事件来源与动作修改记录见 [desktop-pet/guard-source/README.md](desktop-pet/guard-source/README.md)。

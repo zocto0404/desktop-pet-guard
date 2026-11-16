@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": { "frames": "node tools/frames.mjs", "test": "node tools/test.mjs" }
+}
