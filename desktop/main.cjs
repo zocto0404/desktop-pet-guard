@@ -1,0 +1,24 @@
+const {app,BrowserWindow,ipcMain,screen,globalShortcut,Menu,Tray,nativeImage}=require('electron');
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
+let window,server,tray,quitting=false;const qa=process.argv.includes('--qa');
+function quitPet(){if(quitting)return;quitting=true;globalShortcut.unregisterAll();tray?.destroy();server?.closeAllConnections();server?.close();window?.destroy();app.quit();}
+function petMenu(){return Menu.buildFromTemplate([{label:'开始守护',click:()=>window?.webContents.send('pet:command','start')},{label:'暂停 / 继续',click:()=>window?.webContents.send('pet:command','pause')},{type:'separator'},{label:'退出桌宠',accelerator:'Ctrl+Alt+Q',click:quitPet}])}
+const userData=qa?path.resolve(__dirname,'../.local/electron-user'):path.join(path.dirname(process.execPath),'UserData');fs.mkdirSync(userData,{recursive:true});app.setPath('userData',userData);app.setPath('crashDumps',path.join(userData,'CrashDumps'));
+const root=fs.existsSync(path.join(__dirname,'dist'))?path.join(__dirname,'dist'):path.resolve(__dirname,'../dist');
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml'};
+app.setName('桌宠');app.commandLine.appendSwitch('disable-background-networking');
+app.whenReady().then(async()=>{
+ server=http.createServer((req,res)=>{try{let p=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(p===root)p=path.join(root,'index.html');if(!p.startsWith(root+path.sep)){res.writeHead(403);return res.end()}res.writeHead(200,{'Content-Type':mime[path.extname(p)]||'application/octet-stream'});fs.createReadStream(p).on('error',()=>res.end()).pipe(res)}catch{res.writeHead(404);res.end()}});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const area=screen.getPrimaryDisplay().workArea,width=Math.min(1200,area.width),height=Math.round(width/2);
+ window=new BrowserWindow({width,height,x:area.x+Math.round((area.width-width)/2),y:area.y+area.height-height,transparent:true,backgroundColor:'#00000000',frame:false,thickFrame:false,hasShadow:false,resizable:false,alwaysOnTop:true,skipTaskbar:true,show:false,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,backgroundThrottling:false}});
+ Menu.setApplicationMenu(null);window.setMenuBarVisibility(false);window.setVisibleOnAllWorkspaces(true);window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+ const origin=`http://127.0.0.1:${server.address().port}`;window.webContents.session.webRequest.onBeforeRequest((details,done)=>done({cancel:!details.url.startsWith(origin+'/')}));window.webContents.on('will-navigate',(event,url)=>{if(!url.startsWith(origin+'/'))event.preventDefault()});
+ await window.loadURL(`http://127.0.0.1:${server.address().port}/${qa?'?qa=1':''}`);
+ if(!qa){tray=new Tray(nativeImage.createFromPath(path.join(__dirname,'tray.png')));tray.setToolTip('桌宠 · 右键退出');tray.setContextMenu(petMenu());tray.on('double-click',()=>{window.setIgnoreMouseEvents(false);lastHit=true;window.show();window.focus()});globalShortcut.register('CommandOrControl+Alt+P',()=>window.webContents.send('pet:command','start'));globalShortcut.register('CommandOrControl+Alt+Q',quitPet);}
+ if(qa){await new Promise(r=>setTimeout(r,1300));const state=await window.webContents.executeJavaScript('({loaded:!!window.deskPet,version:window.deskPet?.version,text:document.body.innerText,background:getComputedStyle(document.body).backgroundColor})');const shot=await window.webContents.capturePage();const png=shot.toPNG(),bitmap=shot.toBitmap();let alphaZero=0,alphaSolid=0,edge=0;for(let i=3;i<bitmap.length;i+=4){if(bitmap[i]===0)alphaZero++;else if(bitmap[i]===255)alphaSolid++;else edge++;}const dir=path.resolve(__dirname,'../.local');fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'desktop-alpha.png'),png);fs.writeFileSync(path.join(dir,'desktop-qa.json'),JSON.stringify({state,transparent:true,frame:false,alphaZero,alphaSolid,edge,pixels:bitmap.length/4,pass:state.loaded&&!state.text&&alphaZero>bitmap.length/4*.5&&edge>0},null,2));const exit=petMenu().items.find(item=>item.label==='退出桌宠');if(!exit)throw Error('Missing exit action');exit.click();}
+});
+ipcMain.on('pet:ready',()=>{if(!qa)window?.show()});let lastHit=true;
+ ipcMain.on('pet:menu',()=>{if(!qa)petMenu().popup({window})});
+ipcMain.on('pet:hit',(_,hit)=>{if(hit!==lastHit&&!qa){lastHit=hit;window?.setIgnoreMouseEvents(!hit,{forward:true})}});
+ipcMain.on('pet:move',(_,{dx,dy})=>{if(!Number.isFinite(dx)||!Number.isFinite(dy))return;const [x,y]=window.getPosition();window.setPosition(x+Math.round(dx),y+Math.round(dy))});
+app.on('window-all-closed',()=>app.quit());app.on('will-quit',()=>{globalShortcut.unregisterAll();server?.close()});

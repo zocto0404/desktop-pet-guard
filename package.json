@@ -1,0 +1,11 @@
+{
+  "name": "pet-guard",
+  "version": "2.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "check": "node --check dist/app.js && node --check dist/engine.js && node --check dist/art.js && node tools/test.mjs",
+    "frames": "node tools/frames.mjs"
+  }
+}
